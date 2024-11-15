@@ -78,3 +78,12 @@ To trigger this task we can simply insert a payload in RabbitMQ (using the UI or
 When received the message will be sent to the `task1(...)` function and print out the keys & values received in the `data` field. When the function is done executing, the `Task` object will be stored in a SQLite database with the status of the task set to `DONE`
 
 If the unmarshalling of the data fails, the task's status is updated to `ERROR` and the function stops executing 
+
+The `.env` file will give access to the program to various values that will allow it to work properly. Failing to have those value set in the .env file will lead to a `panic`.
+
+# TODO
+
+* Unit tests
+* Add configuration through JSON file instead of a .env
+* Add the flexibility to use any message broker
+* ...
