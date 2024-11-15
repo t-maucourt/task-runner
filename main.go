@@ -33,33 +33,6 @@ func task1(ctx context.Context, m transport.Message) {
 	log.Println("Task done", tsk)
 }
 
-func task2(ctx context.Context, m transport.Message) {
-	var data int
-	json.Unmarshal(m.Data, &data)
-	fmt.Println(data)
-}
-
-func task3(ctx context.Context, m transport.Message) {
-	type D struct {
-		FirstName string `json:"first_name"`
-		LastName  string `json:"last_name"`
-	}
-
-	var d D
-	err := json.Unmarshal(m.Data, &d)
-	fmt.Println(err)
-	fmt.Println(d)
-}
-
-func setupTasks() *tasks.TaskRepository {
-	taskRepository := tasks.NewTaskRepository()
-	taskRepository.RegisterTask("task-1", task1)
-	taskRepository.RegisterTask("task-2", task2)
-	taskRepository.RegisterTask("task-3", task3)
-
-	return taskRepository
-}
-
 func main() {
 	err := godotenv.Load()
 	if err != nil {
@@ -68,7 +41,8 @@ func main() {
 
 	log.Println("task-runner started")
 
-	taskRepository := setupTasks()
+	taskRepository := tasks.NewTaskRepository()
+	taskRepository.RegisterTask("task-1", task1)
 
 	listener.Listen(taskRepository)
 }
