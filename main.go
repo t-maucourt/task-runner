@@ -7,22 +7,20 @@ import (
 	"log"
 	"task-runner/cmd/listener"
 	"task-runner/cmd/model"
-	"task-runner/cmd/task"
+	"task-runner/cmd/tasks"
+	"task-runner/cmd/transport"
 
-	"github.com/jmoiron/sqlx"
+	"github.com/joho/godotenv"
 )
 
-type TaskFn func(context.Context, task.Message)
+func task1(ctx context.Context, m transport.Message) {
+	tsk := ctx.Value(listener.ContextTask("task")).(*tasks.Task)
 
-func task1(ctx context.Context, m task.Message) {
-	tsk := ctx.Value(listener.ContextTask("task")).(*task.Task)
-	dbo := ctx.Value(listener.ContextDB("db")).(*sqlx.DB)
-
-	defer model.NewTaskModel(dbo).Save(tsk)
+	defer model.NewTaskModel().Save(tsk)
 
 	var d map[string]string
 	if err := json.Unmarshal(m.Data, &d); err != nil {
-		tsk.Status = task.STATUS_ERROR
+		tsk.Status = tasks.STATUS_ERROR
 		log.Printf("Couldn't unmarshall data - %s", tsk)
 		return
 	}
@@ -31,31 +29,46 @@ func task1(ctx context.Context, m task.Message) {
 		fmt.Println(k, v)
 	}
 
-	tsk.Status = task.STATUS_DONE
+	tsk.Status = tasks.STATUS_DONE
 	log.Println("Task done", tsk)
 }
 
-func task2(ctx context.Context, m task.Message) {
+func task2(ctx context.Context, m transport.Message) {
 	var data int
 	json.Unmarshal(m.Data, &data)
 	fmt.Println(data)
 }
 
-func setupTasks() *task.TaskRepository {
+func task3(ctx context.Context, m transport.Message) {
+	type D struct {
+		FirstName string `json:"first_name"`
+		LastName  string `json:"last_name"`
+	}
 
-	taskRepository := task.NewTaskRepository()
+	var d D
+	err := json.Unmarshal(m.Data, &d)
+	fmt.Println(err)
+	fmt.Println(d)
+}
+
+func setupTasks() *tasks.TaskRepository {
+	taskRepository := tasks.NewTaskRepository()
 	taskRepository.RegisterTask("task-1", task1)
 	taskRepository.RegisterTask("task-2", task2)
+	taskRepository.RegisterTask("task-3", task3)
 
 	return taskRepository
 }
 
 func main() {
-	fmt.Println("Task runner")
+	err := godotenv.Load()
+	if err != nil {
+		panic("couldn't load .env file: " + err.Error())
+	}
 
-	db := model.InitDB()
+	log.Println("task-runner started")
 
 	taskRepository := setupTasks()
 
-	listener.Listen(taskRepository, db)
+	listener.Listen(taskRepository)
 }

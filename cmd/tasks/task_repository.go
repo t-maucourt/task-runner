@@ -1,7 +1,6 @@
-package task
+package tasks
 
 import (
-	"context"
 	"fmt"
 )
 
@@ -9,14 +8,8 @@ type TaskRepository struct {
 	tasks []*Task
 }
 
-func (tr *TaskRepository) RegisterTask(name string, fn func(context.Context, Message)) {
+func (tr *TaskRepository) RegisterTask(name string, fn TaskFn) {
 	tr.tasks = append(tr.tasks, newTask(name, fn))
-}
-
-func (tr *TaskRepository) ListTasks() {
-	for _, task := range tr.tasks {
-		fmt.Println(task)
-	}
 }
 
 func (tr *TaskRepository) GetTaskFromName(name string) (*Task, error) {
