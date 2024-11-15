@@ -43,7 +43,7 @@ func Listen(tr *tasks.TaskRepository) {
 	utils.PanicOnError(err, "error while starting consuming the channel")
 
 	for rmqMsg := range rmqMsgs {
-		handleMessage(rmqMsg.Body, tr)
+		go handleMessage(rmqMsg.Body, tr)
 	}
 }
 
