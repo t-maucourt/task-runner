@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"task-runner/cmd/listener"
+	"task-runner/cmd/consumers"
 	"task-runner/cmd/model"
 	"task-runner/cmd/tasks"
 	"task-runner/cmd/transport"
@@ -14,7 +14,7 @@ import (
 )
 
 func task1(ctx context.Context, m transport.Message) {
-	tsk := ctx.Value(listener.ContextTask("task")).(*tasks.Task)
+	tsk := ctx.Value(consumers.ContextTask("task")).(*tasks.Task)
 
 	defer model.NewTaskModel().Save(tsk)
 
@@ -44,5 +44,5 @@ func main() {
 	taskRepository := tasks.NewTaskRepository()
 	taskRepository.RegisterTask("task-1", task1)
 
-	listener.Listen(taskRepository)
+	consumers.Run(taskRepository)
 }

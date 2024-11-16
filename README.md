@@ -79,11 +79,9 @@ When received the message will be sent to the `task1(...)` function and print ou
 
 If the unmarshalling of the data fails, the task's status is updated to `ERROR` and the function stops executing 
 
-The `.env` file will give access to the program to various values that will allow it to work properly. Failing to have those value set in the .env file will lead to a `panic`.
+In order to run the program, you need a JSON configuration file, and the filename needs to be added to your env variables under the name `CONFIG_FILE`
 
 # TODO
 
 * Unit tests
-* Add configuration through JSON file instead of a .env
-* Add the flexibility to use any message broker
 * ...

@@ -1,7 +1,7 @@
 package model
 
 import (
-	"os"
+	"task-runner/cmd/configuration"
 )
 
 var taskDB string
@@ -11,7 +11,7 @@ func GetTaskDBName() string {
 		return taskDB
 	}
 
-	taskDB = os.Getenv("DB_FILENAME")
+	taskDB = configuration.GetConfig().DB.Filename
 	if taskDB == "" {
 		panic("missing DB_FILENAME env variable")
 	}

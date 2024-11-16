@@ -1,10 +1,9 @@
-package listener
+package consumers
 
 import (
 	"context"
 	"encoding/json"
 	"log"
-	"os"
 	"task-runner/cmd/tasks"
 	"task-runner/cmd/transport"
 	"task-runner/cmd/utils"
@@ -12,15 +11,17 @@ import (
 	amqp "github.com/rabbitmq/amqp091-go"
 )
 
-var rqmURI string
-var queueName string
+const RabbitMQ = "RabbitMQ"
 
-type ContextTask string
+type rabbitMQConfig struct {
+	URI       string `json:"uri"`
+	QueueName string `json:"queue_name"`
+}
 
-func Listen(tr *tasks.TaskRepository) {
-	loadConfiguration()
+func consumeRabbitMQ(tr *tasks.TaskRepository) {
+	config := readConfig(RabbitMQ).(rabbitMQConfig)
 
-	conn, err := amqp.Dial(rqmURI)
+	conn, err := amqp.Dial(config.URI)
 	utils.PanicOnError(err, "error while dialing rabbitMQ")
 	defer conn.Close()
 
@@ -28,7 +29,7 @@ func Listen(tr *tasks.TaskRepository) {
 	utils.PanicOnError(err, "error while opening a channel")
 	defer ch.Close()
 
-	queue, err := ch.QueueDeclare(queueName, false, false, false, false, nil)
+	queue, err := ch.QueueDeclare(config.QueueName, false, false, false, false, nil)
 	utils.PanicOnError(err, "error while declaring a queue")
 
 	rmqMsgs, err := ch.Consume(
@@ -47,21 +48,9 @@ func Listen(tr *tasks.TaskRepository) {
 	}
 }
 
-func loadConfiguration() {
-	rqmURI = os.Getenv("RMQ_URI")
-	if rqmURI == "" {
-		panic("missing RMQ_URI env variable")
-	}
-
-	queueName = os.Getenv("RMQ_QUEUE_NAME")
-	if queueName == "" {
-		panic("missing RMQ_QUEUE_NAME env variable")
-	}
-}
-
-func handleMessage(rmqMsgBody []byte, tr *tasks.TaskRepository) {
+func handleMessage(messageBody []byte, tr *tasks.TaskRepository) {
 	var msg transport.Message
-	json.Unmarshal(rmqMsgBody, &msg)
+	json.Unmarshal(messageBody, &msg)
 
 	t, err := tr.GetTaskFromName(msg.TaskName)
 	if err != nil {

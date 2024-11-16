@@ -1,0 +1,12 @@
+{
+    "DB": {
+        "filename": "tasks.db"
+    },
+    "broker": {
+        "type": "RabbitMQ",
+        "configuration": {
+            "uri": "amqp://guest:guest@localhost:5672/",
+            "queue_name": "task-runner"
+        }
+    }
+}
