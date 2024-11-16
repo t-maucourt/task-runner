@@ -84,4 +84,5 @@ In order to run the program, you need a JSON configuration file, and the filenam
 # TODO
 
 * Unit tests
+* Allow the addition of custom consumers
 * ...
